@@ -115,7 +115,7 @@ Mimovrste/
 git clone https://github.com/belashandrej-png/Mimovrste.git
 
 2. Перейти в папку проекта
-cd dataOzon
+cd Mimovrste
 
 3. Создать виртуальное окружение
 python -m venv venv
