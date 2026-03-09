@@ -81,17 +81,19 @@
 
 # Структура репозитория
 
+```
 dataOzon/
 │
-├── data/ # исходные и обработанные данные
-├── notebooks/ # Jupyter Notebook с анализом
-├── src/ # вспомогательные скрипты
-├── README.md # описание проекта
-├── PROJECT_PLAN.md # план проекта
-├── DATA_DICTIONARY.md # описание переменных
-├── requirements.txt # зависимости проекта
-└── .gitignore # исключаемые файлы
-
+├── data/                # dataset
+├── notebooks/           # analysis notebooks
+│   └── main.ipynb
+├── src/                 # python scripts
+├── README.md
+├── PROJECT_PLAN.md
+├── DATA_DICTIONARY.md
+├── requirements.txt
+└── .gitignore
+```
 
 # Используемые технологии
 
