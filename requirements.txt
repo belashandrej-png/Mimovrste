@@ -1,8 +1,7 @@
 pandas
-numpy
-matplotlib
-seaborn
-jupyter
-notebook
-openpyxl
-scipy
+os
+json
+datetime
+time
+shutil
+
