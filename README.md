@@ -82,7 +82,7 @@
 # Структура репозитория
 
 ```
-dataOzon/
+Mimovrste/
 │
 ├── data/                # dataset
 ├── notebooks/           # analysis notebooks
