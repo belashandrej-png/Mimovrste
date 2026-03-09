@@ -112,7 +112,7 @@ dataOzon/
 # Запуск проекта
 
 1. Клонировать репозиторий
-git clone https://github.com/belashandrej-png/dataOzon.git
+git clone https://github.com/belashandrej-png/Mimovrste.git
 
 2. Перейти в папку проекта
 cd dataOzon
