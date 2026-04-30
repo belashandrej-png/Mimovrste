@@ -1,3 +1,4 @@
+<img width="4166" height="2074" alt="price_trend_categories" src="https://github.com/user-attachments/assets/632faca1-47ea-47a1-a2ea-965bacc5bc72" />
 # 6. Визуализация результатов
 
 ## 6.1. Требования к визуализации
@@ -51,7 +52,8 @@
 
 **График:** Динамика средних цен по топ-10 категориям (2021-2023)
 
-![price_trend_categories](../reports/figures/price_trend_categories.png)
+![price_trend_categories](../reports/figures/price_trend_categories.png)<img width="4166" height="2074" alt="price_trend_categories" src="https://github.com/user-attachments/assets/91afacd6-8d98-41f7-b377-c75ebf5a0abe" />
+
 
 **Числовые характеристики:**
 - Объём выборки: 50 002 строки
