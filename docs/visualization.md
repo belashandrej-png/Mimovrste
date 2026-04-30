@@ -1,4 +1,3 @@
-<img width="4166" height="2074" alt="price_trend_categories" src="https://github.com/user-attachments/assets/632faca1-47ea-47a1-a2ea-965bacc5bc72" />
 # 6. Визуализация результатов
 
 ## 6.1. Требования к визуализации
