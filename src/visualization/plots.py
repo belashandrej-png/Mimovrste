@@ -59,3 +59,19 @@ def save_volatility_plot(df_volatility: pd.DataFrame, output_path: str, top_n: i
     plt.tight_layout()
     plt.savefig(output_path, dpi=300)
     plt.close()
+def save_all_plots(df, trends, seasonality, volatility, output_dir):
+    """Сохраняет все графики анализа в указанную директорию."""
+    from pathlib import Path
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    
+    print("Сохранение графика динамики цен...")
+    save_trend_plot(trends, output_dir / "price_trend_categories.png")
+    
+    print("Сохранение графика сезонности...")
+    save_seasonality_plot(seasonality, output_dir / "seasonality.png")
+    
+    print("Сохранение графика волатильности...")
+    save_volatility_plot(volatility, output_dir / "volatility.png")
+    
+    print(f" Все графики сохранены в: {output_dir}")
