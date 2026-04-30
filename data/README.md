@@ -76,3 +76,10 @@
 - Сохранение пропорций по категориям
 
 ## Расположение файлов
+data/
+├── raw/
+│ └── mimodump-dataset.csv (26 ГБ) - исходные данные
+├── processed/
+│ ├── mimovrste_sample.parquet - выборка для анализа
+│ └── dataset_profile.json - профиль обработки
+└── README.md - этот файл
