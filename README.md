@@ -134,7 +134,7 @@ print('Скачивание датасета govzegunns/mimovrste-2021-2023-item
 path = kagglehub.dataset_download('govzegunns/mimovrste-2021-2023-item-prices')
 print(f'Датасет скачан в: {path}')
 
-# Создаём папку data/ и копируем все файлы (внутри zip будет один большой CSV)
+# Создаём папку data/ и копируем все файлы
 os.makedirs('data', exist_ok=True)
 for file in os.listdir(path):
     full_path = os.path.join(path, file)
