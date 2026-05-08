@@ -14,7 +14,20 @@ def load_data():
     try:
         # Читаем ТОЛЬКО первые 50,000 строк для скорости!
         # Этого достаточно для демонстрации
-        df = pd.read_csv('data/mimodump-dataset.csv', nrows=50000)
+        # Читаем только нужные колонки для скорости
+        df = pd.read_csv(
+            'data/mimodump-dataset.csv',
+            nrows=50000,
+            usecols=['name', 'price', 'current_price', 'brand_name', 
+             'category_name', 'review_stars', 'review_count'],
+            dtype={
+                'price': 'float32',
+                'current_price': 'float32',
+                'review_stars': 'float32',
+                'review_count': 'int32'
+            },
+            low_memory=False
+        )
         
         # Преобразуем числовые колонки
         numeric_cols = ['price', 'current_price', 'lowest_price', 'msrp_price', 
