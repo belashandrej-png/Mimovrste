@@ -11,11 +11,21 @@ st.markdown("---")
 @st.cache_data(ttl=3600)
 def load_data():
     try:
-        df = pd.read_csv(
-            'O:/extracted/mimodump-dataset.csv',
-            nrows=50000,
-            low_memory=False
-        )
+        # Пробуем разные разделители
+        for sep in [',', ';', '\t', '|']:
+            try:
+                df = pd.read_csv(
+                    'O:/extracted/mimodump-dataset.csv',
+                    nrows=50000,
+                    sep=sep,
+                    low_memory=False,
+                    encoding='utf-8'
+                )
+                # Если прочитали больше 1 колонки — разделитель правильный
+                if len(df.columns) > 1:
+                    break
+            except:
+                continue
         
         # Преобразуем числовые колонки
         numeric_cols = ['price', 'current_price', 'lowest_price', 'msrp_price', 
