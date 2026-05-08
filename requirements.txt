@@ -1,5 +1,4 @@
 # Данные и анализ
-pandas>=1.5.0
 numpy>=1.24.0
 
 # Визуализация
@@ -17,3 +16,8 @@ python-dateutil>=2.8.2
 # Опционально: для работы с базами данных
 # psycopg2-binary>=2.9.6
 # pymongo>=4.3.3
+
+streamlit>=1.45.0
+pandas>=2.0.0
+plotly>=5.24.0
+duckdb>=1.0.0
