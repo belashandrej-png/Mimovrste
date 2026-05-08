@@ -4,7 +4,8 @@ import pandas as pd
 import duckdb
 import plotly.express as px
 
-st.set_page_config(page_title="Аналитическая платформа Mimovrste", layout="wide")
+st.set_page_config(page_title="Аналитическая платформа Mimovrste", layout="wide", page_icon="📊")
+
 st.title("📊 Аналитическая платформа Mimovrste")
 st.markdown("*Анализ динамики цен и структуры ассортимента*")
 st.markdown("---")
@@ -28,9 +29,8 @@ def load_data():
 df = load_data()
 
 if df is not None and len(df) > 0:
-    # === МЕТРИКИ ===
+    # Метрики
     col1, col2, col3, col4 = st.columns(4)
-    
     col1.metric("📦 Товаров", f"{len(df):,}")
     
     if 'category_name' in df.columns:
@@ -44,7 +44,7 @@ if df is not None and len(df) > 0:
     else:
         col3.metric("💰 Средняя цена", "N/A")
     
-    # ✅ ИСПРАВЛЕНИЕ: brand_name вместо brand
+    # ИСПРАВЛЕНО: brand_name вместо brand!
     if 'brand_name' in df.columns:
         brands_count = df['brand_name'].dropna().nunique()
         col4.metric("🏷️ Брендов", f"{brands_count:,}" if brands_count > 0 else "N/A")
@@ -53,7 +53,7 @@ if df is not None and len(df) > 0:
     
     st.markdown("---")
     
-    # === ГРАФИКИ ===
+    # Графики
     col_left, col_right = st.columns(2)
     
     with col_left:
@@ -72,7 +72,7 @@ if df is not None and len(df) > 0:
                 fig = px.histogram(valid, x="price", nbins=50)
                 st.plotly_chart(fig, use_container_width=True)
     
-    # === ДОП: Топ брендов ===
+    # Топ брендов
     st.subheader("🏆 Топ-10 брендов по количеству товаров")
     if 'brand_name' in df.columns:
         top_brands = df['brand_name'].dropna().value_counts().head(10).reset_index()
