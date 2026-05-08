@@ -103,15 +103,18 @@ if df is not None:
 
     # Фильтр по цене
     if 'price' in df.columns:
-        # Преобразуем к float для совместимости со слайдером
+        # ИСПРАВЛЕНИЕ: явно преобразуем все значения к float
         min_price = float(df['price'].min()) if not df['price'].isna().all() else 0.0
         max_price = float(df['price'].max()) if not df['price'].isna().all() else 1000.0
+        
+        # Убеждаемся, что значение по умолчанию тоже float
+        default_max = float(min(max_price, 500.0))
         
         price_range = st.sidebar.slider(
             "Диапазон цен (€):",
             min_value=min_price,
             max_value=max_price,
-            value=(min_price, float(min(max_price, 500.0)))
+            value=(min_price, default_max)
         )
         df = df[(df['price'] >= price_range[0]) & (df['price'] <= price_range[1])]
 
@@ -120,12 +123,21 @@ if df is not None:
     
     with col1:
         st.metric(label="📦 Всего Товаров", value=f"{len(df):,}", delta_color="off")
+    
     with col2:
-        st.metric(label="🏷️ Уникальных Брендов", value=f"{df['brand_name'].nunique():,}" if 'brand_name' in df.columns else "N/A")
+        if 'brand_name' in df.columns:
+            st.metric(label="🏷️ Уникальных Брендов", value=f"{df['brand_name'].nunique():,}")
+        else:
+            st.metric(label="🏷️ Уникальных Брендов", value="N/A")
+    
     with col3:
         st.metric(label="💰 Средняя Цена", value=f"{df['price'].mean():.2f} €")
+    
     with col4:
-        st.metric(label="⭐ Средний Рейтинг", value=f"{df['review_stars'].mean():.2f}/5" if 'review_stars' in df.columns else "N/A")
+        if 'review_stars' in df.columns:
+            st.metric(label="⭐ Средний Рейтинг", value=f"{df['review_stars'].mean():.2f}/5")
+        else:
+            st.metric(label="⭐ Средний Рейтинг", value="N/A")
 
     st.markdown("---")
 
@@ -159,7 +171,7 @@ if df is not None:
     c1, c2 = st.columns(2)
 
     with c1:
-        st.subheader(" Топ-10 Брендов (Bar Chart)")
+        st.subheader("🏆 Топ-10 Брендов (Bar Chart)")
         if 'brand_name' in df.columns:
             brand_counts = df['brand_name'].value_counts().head(10).reset_index()
             brand_counts.columns = ['Бренд', 'Количество']
@@ -191,8 +203,9 @@ if df is not None:
         if 'review_count' in df.columns:
             df_scatter = df[(df['review_count'] < 100) & (df['price'] < 200)].dropna() # Фильтр выбросов
             fig_scatter = px.scatter(df_scatter, x='review_count', y='price',
-                                     color='category_name', size='price',
-                                     hover_data=['name'],
+                                     color='category_name' if 'category_name' in df_scatter.columns else None, 
+                                     size='price',
+                                     hover_data=['name'] if 'name' in df_scatter.columns else None,
                                      title='Зависимость цены от популярности',
                                      color_discrete_sequence=px.colors.qualitative.Pastel1)
             fig_scatter.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
