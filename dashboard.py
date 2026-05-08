@@ -16,7 +16,7 @@ def load_data():
         # Этого достаточно для демонстрации
         # Читаем только нужные колонки для скорости
         df = pd.read_csv(
-            'data/mimodump-dataset.csv',
+            'O:/extracted/mimodump-dataset.csv',
             nrows=50000,
             usecols=['name', 'price', 'current_price', 'brand_name', 
              'category_name', 'review_stars', 'review_count'],
