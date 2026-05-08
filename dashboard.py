@@ -103,8 +103,16 @@ if df is not None:
 
     # Фильтр по цене
     if 'price' in df.columns:
-        min_p, max_p = float(df['price'].min()), float(df['price'].max())
-        price_range = st.sidebar.slider("Диапазон цен (€):", min_p, max_p, (min_p, min(max_p, 500)))
+        # Преобразуем к float для совместимости со слайдером
+        min_price = float(df['price'].min()) if not df['price'].isna().all() else 0.0
+        max_price = float(df['price'].max()) if not df['price'].isna().all() else 1000.0
+        
+        price_range = st.sidebar.slider(
+            "Диапазон цен (€):",
+            min_value=min_price,
+            max_value=max_price,
+            value=(min_price, float(min(max_price, 500.0)))
+        )
         df = df[(df['price'] >= price_range[0]) & (df['price'] <= price_range[1])]
 
     # === БЛОК 1: KPI МЕТРИКИ (Красивые карточки) ===
