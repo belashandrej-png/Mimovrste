@@ -2,6 +2,7 @@
 import streamlit as st
 import pandas as pd
 import duckdb
+import plotly.express as px
 
 st.set_page_config(page_title="Аналитическая платформа Mimovrste", layout="wide")
 st.title("📊 Аналитическая платформа Mimovrste")
@@ -14,7 +15,7 @@ def load_data():
         con = duckdb.connect()
         df = con.execute(f"SELECT * FROM 'O:\\extracted\\mimovrste_sample.parquet'").df()
         
-        # Преобразуем цены
+        # Преобразуем цены в числовые
         for col in ['price', 'current_price', 'lowest_price', 'msrp_price']:
             if col in df.columns:
                 df[col] = pd.to_numeric(df[col], errors='coerce')
@@ -26,66 +27,16 @@ def load_data():
 
 df = load_data()
 
-if df is not None:
-    # === ОТЛАДКА: Проверяем brand_name ===
-    st.info("🔍 **Отладка колонки brand_name:**")
-    
-    if 'brand_name' in df.columns:
-        total_rows = len(df)
-        null_count = df['brand_name'].isna().sum()
-        empty_count = (df['brand_name'] == '').sum()
-        unique_count = df['brand_name'].nunique()
-        non_null_count = df['brand_name'].notna().sum()
-        
-        col_debug1, col_debug2, col_debug3, col_debug4 = st.columns(4)
-        col_debug1.metric("Всего записей", f"{total_rows:,}")
-        col_debug2.metric("Пустых (NaN)", f"{null_count:,}")
-        col_debug3.metric("Пустых строк", f"{empty_count:,}")
-        col_debug4.metric("Уникальных значений", f"{unique_count:,}")
-        
-        # Показываем примеры брендов
-        st.write("**Примеры брендов (первые 10 непустых):**")
-        sample_brands = df['brand_name'].dropna()
-        sample_brands = sample_brands[sample_brands != '']
-        st.write(sample_brands.head(10).tolist())
-        
-        # Пробуем разные способы подсчета
-        st.write("---")
-        st.write("**Разные способы подсчета брендов:**")
-        
-        # Способ 1: Просто nunique
-        method1 = df['brand_name'].nunique()
-        st.write(f"1. df['brand_name'].nunique() = {method1:,}")
-        
-        # Способ 2: dropna + nunique
-        method2 = df['brand_name'].dropna().nunique()
-        st.write(f"2. df['brand_name'].dropna().nunique() = {method2:,}")
-        
-        # Способ 3: dropna + не пустые строки + nunique
-        method3 = df['brand_name'].dropna()
-        method3 = method3[method3.astype(str).str.strip() != '']
-        method3 = method3.nunique()
-        st.write(f"3. dropna + не пустые строки = {method3:,}")
-        
-        # Способ 4: groupby + count
-        method4 = df.groupby('brand_name').size().reset_index(name='count')
-        method4 = method4[method4['count'] > 0]
-        st.write(f"4. groupby count > 0 = {len(method4):,}")
-        
-        # Итоговое значение для метрики
-        final_brand_count = method3
-        
-    else:
-        st.error("❌ Колонка 'brand_name' не найдена!")
-        st.write("Доступные колонки:", df.columns.tolist())
-        final_brand_count = 0
-    
-    st.markdown("---")
-    
+if df is not None and len(df) > 0:
     # === МЕТРИКИ ===
     col1, col2, col3, col4 = st.columns(4)
+    
     col1.metric("📦 Товаров", f"{len(df):,}")
-    col2.metric("📂 Категорий", f"{df['category_name'].nunique():,}" if 'category_name' in df.columns else "N/A")
+    
+    if 'category_name' in df.columns:
+        col2.metric("📂 Категорий", f"{df['category_name'].nunique():,}")
+    else:
+        col2.metric("📂 Категорий", "N/A")
     
     if 'price' in df.columns:
         valid_prices = df['price'].dropna()
@@ -93,7 +44,12 @@ if df is not None:
     else:
         col3.metric("💰 Средняя цена", "N/A")
     
-    col4.metric("🏷️ Брендов", f"{final_brand_count:,}" if final_brand_count > 0 else "Нет данных")
+    # ✅ ИСПРАВЛЕНИЕ: brand_name вместо brand
+    if 'brand_name' in df.columns:
+        brands_count = df['brand_name'].dropna().nunique()
+        col4.metric("🏷️ Брендов", f"{brands_count:,}" if brands_count > 0 else "N/A")
+    else:
+        col4.metric("🏷️ Брендов", "N/A")
     
     st.markdown("---")
     
@@ -115,6 +71,14 @@ if df is not None:
             if len(valid) > 0:
                 fig = px.histogram(valid, x="price", nbins=50)
                 st.plotly_chart(fig, use_container_width=True)
+    
+    # === ДОП: Топ брендов ===
+    st.subheader("🏆 Топ-10 брендов по количеству товаров")
+    if 'brand_name' in df.columns:
+        top_brands = df['brand_name'].dropna().value_counts().head(10).reset_index()
+        top_brands.columns = ['Бренд', 'Количество']
+        fig_brands = px.bar(top_brands, x='Количество', y='Бренд', orientation='h')
+        st.plotly_chart(fig_brands, use_container_width=True)
 
 else:
     st.warning("⚠️ Данные не загружены")
