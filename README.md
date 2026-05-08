@@ -109,29 +109,43 @@ Mimovrste/
 
 # Запуск проекта
 
-1. Клонировать репозиторий
+# 1. Клонируем репозиторий
 git clone https://github.com/belashandrej-png/Mimovrste.git
-
-2. Перейти в папку проекта
 cd Mimovrste
 
-3. Создать виртуальное окружение
+# 2. Создаем виртуальное окружение
 python -m venv venv
+source venv/bin/activate          # Windows: venv\Scripts\activate
 
-4. Активировать окружение
-Windows:
-venv\Scripts\activate
-
-Mac / Linux:
-
-source venv/bin/activate
-
-5. Установить зависимости
+# 3. Устанавливаем зависимости
+pip install --upgrade pip
 pip install -r requirements.txt
 
-6. Запустить Jupyter Notebook
-jupyter notebook
+# 4. Устанавливаем kagglehub
+pip install kagglehub
 
-После этого можно открыть ноутбук с анализом данных.
+# 5. Скачиваем датасет (в автоматическую папку кэша KaggleHub) и копируем в ./data/
+python -c "
+import kagglehub
+import os
+import shutil
 
+print('Скачивание датасета govzegunns/mimovrste-2021-2023-item-prices (26 GB zip)...')
+path = kagglehub.dataset_download('govzegunns/mimovrste-2021-2023-item-prices')
+print(f'Датасет скачан в: {path}')
+
+# Создаём папку data/ и копируем все файлы (внутри zip будет один большой CSV)
+os.makedirs('data', exist_ok=True)
+for file in os.listdir(path):
+    full_path = os.path.join(path, file)
+    dest = os.path.join('data', file)
+    if os.path.isfile(full_path):
+        shutil.copy(full_path, dest)
+        print(f'Скопирован {file} -> {dest}')
+
+print('Готово. Файлы датасета лежат в ./data/')
+"
+
+# 6. Запускаем Streamlit-приложение (порт 8501)
+streamlit run app.py
 ---
