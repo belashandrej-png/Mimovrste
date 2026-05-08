@@ -109,6 +109,8 @@ Mimovrste/
 
 # Запуск проекта
 
+## Если наблюдаются проблемы, есть инструкция к запуску в Starting Instructions.docx
+
 # 1. Клонируем репозиторий
 git clone https://github.com/belashandrej-png/Mimovrste.git
 cd Mimovrste
