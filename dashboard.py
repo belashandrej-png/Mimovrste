@@ -57,7 +57,7 @@ st.markdown("---")
 def load_data():
     try:
         con = duckdb.connect()
-        df = con.execute(f"SELECT * FROM 'O:\\extracted\\mimovrste_sample.parquet'").df()
+        df = con.execute(f"SELECT * FROM '{DATA_PATH}'").df()
         
         # === ВАЖНО: Преобразуем ВСЕ числовые колонки ===
         numeric_cols = ['price', 'current_price', 'lowest_price', 'msrp_price', 
