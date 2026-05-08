@@ -29,8 +29,9 @@ def load_data():
 df = load_data()
 
 if df is not None and len(df) > 0:
-    # Метрики
+    # === МЕТРИКИ ===
     col1, col2, col3, col4 = st.columns(4)
+    
     col1.metric("📦 Товаров", f"{len(df):,}")
     
     if 'category_name' in df.columns:
@@ -44,8 +45,9 @@ if df is not None and len(df) > 0:
     else:
         col3.metric("💰 Средняя цена", "N/A")
     
-    # ИСПРАВЛЕНО: brand_name вместо brand!
+    # ✅ ИСПРАВЛЕНИЕ: Правильный подсчет брендов
     if 'brand_name' in df.columns:
+        # Удаляем NaN и считаем уникальные значения
         brands_count = df['brand_name'].dropna().nunique()
         col4.metric("🏷️ Брендов", f"{brands_count:,}" if brands_count > 0 else "N/A")
     else:
@@ -53,7 +55,7 @@ if df is not None and len(df) > 0:
     
     st.markdown("---")
     
-    # Графики
+    # === ГРАФИКИ ===
     col_left, col_right = st.columns(2)
     
     with col_left:
@@ -72,13 +74,38 @@ if df is not None and len(df) > 0:
                 fig = px.histogram(valid, x="price", nbins=50)
                 st.plotly_chart(fig, use_container_width=True)
     
-    # Топ брендов
+    # === ДОП: Топ брендов ===
     st.subheader("🏆 Топ-10 брендов по количеству товаров")
     if 'brand_name' in df.columns:
         top_brands = df['brand_name'].dropna().value_counts().head(10).reset_index()
         top_brands.columns = ['Бренд', 'Количество']
         fig_brands = px.bar(top_brands, x='Количество', y='Бренд', orientation='h')
         st.plotly_chart(fig_brands, use_container_width=True)
+    
+    # === ИНФОРМАЦИЯ О ДАННЫХ ===
+    st.markdown("---")
+    st.subheader("📋 Информация о данных")
+    
+    info = []
+    for col in df.columns:
+        non_null = df[col].notna().sum()
+        info.append({
+            'Колонка': col,
+            'Тип': str(df[col].dtype),
+            'Заполнено (%)': f"{(non_null / len(df) * 100):.1f}",
+            'Уникальных': df[col].nunique()
+        })
+    
+    info_df = pd.DataFrame(info)
+    st.table(info_df)
+    
+    # Просмотр данных
+    with st.expander("🔍 Просмотр первых 100 записей"):
+        st.dataframe(df.head(100), use_container_width=True)
 
 else:
-    st.warning("⚠️ Данные не загружены")
+    st.warning("⚠️ Данные не загружены. Проверьте путь к файлу.")
+
+# Футер
+st.markdown("---")
+st.markdown("*Аналитическая платформа Mimovrste © 2026*")
