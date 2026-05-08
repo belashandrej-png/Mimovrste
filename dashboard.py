@@ -15,8 +15,17 @@ def load_data():
         con = duckdb.connect()
         df = con.execute(f"SELECT * FROM 'O:\\extracted\\mimovrste_sample.parquet'").df()
         
-        # Конвертируем цены в числовые
+        # Преобразуем цены в числовые
         for col in ['price', 'current_price', 'lowest_price', 'msrp_price']:
+            if col in df.columns:
+                df[col] = pd.to_numeric(df[col], errors='coerce')
+        
+        # Преобразуем brand_name (убираем NaN)
+        if 'brand_name' in df.columns:
+            df['brand_name'] = df['brand_name'].fillna('Unknown')
+        
+        # Преобразуем другие числовые поля
+        for col in ['review_count', 'review_stars', 'product_id']:
             if col in df.columns:
                 df[col] = pd.to_numeric(df[col], errors='coerce')
         
@@ -31,27 +40,18 @@ if df is not None and len(df) > 0:
     # Метрики
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("📦 Товаров", f"{len(df):,}")
-    
-    if 'category_name' in df.columns:
-        col2.metric("📂 Категорий", df['category_name'].nunique())
-    else:
-        col2.metric("📂 Категорий", "N/A")
+    col2.metric("📂 Категорий", df['category_name'].nunique() if 'category_name' in df.columns else "N/A")
     
     if 'price' in df.columns:
-        valid = df['price'].dropna()
-        col3.metric("💰 Средняя цена", f"{valid.mean():.2f} €" if len(valid) > 0 else "N/A")
+        valid_prices = df['price'].dropna()
+        col3.metric("💰 Средняя цена", f"{valid_prices.mean():.2f} €" if len(valid_prices) > 0 else "N/A")
     else:
         col3.metric("💰 Средняя цена", "N/A")
     
-    # Бренды - проверяем разные возможные названия колонок
-    brand_col = None
-    for col in ['brand_name', 'brand', 'manufacturer']:
-        if col in df.columns:
-            brand_col = col
-            break
-    
-    if brand_col:
-        col4.metric("🏷️ Брендов", df[brand_col].dropna().nunique())
+    if 'brand_name' in df.columns:
+        brands = df['brand_name'].dropna()
+        brands = brands[brands != 'Unknown']
+        col4.metric("🏷️ Брендов", f"{brands.nunique():,}" if len(brands) > 0 else "N/A")
     else:
         col4.metric("🏷️ Брендов", "N/A")
     
@@ -63,20 +63,20 @@ if df is not None and len(df) > 0:
     with col_left:
         st.subheader("📈 Топ-10 категорий")
         if 'category_name' in df.columns:
-            top = df['category_name'].value_counts().head(10).reset_index()
-            top.columns = ['Категория', 'Количество']
-            fig = px.bar(top, x='Количество', y='Категория', orientation='h')
+            top_cats = df['category_name'].value_counts().head(10).reset_index()
+            top_cats.columns = ['Категория', 'Количество']
+            fig = px.bar(top_cats, x='Количество', y='Категория', orientation='h')
             st.plotly_chart(fig, use_container_width=True)
     
     with col_right:
         st.subheader("💰 Распределение цен")
         if 'price' in df.columns:
-            prices = df[df['price'].between(0, 500)]['price'].dropna()
-            if len(prices) > 0:
-                fig = px.histogram(prices, x="price", nbins=50)
+            valid = df[df['price'].between(0, 500)]['price'].dropna()
+            if len(valid) > 0:
+                fig = px.histogram(valid, x="price", nbins=50)
                 st.plotly_chart(fig, use_container_width=True)
     
-    # Информация о данных (без st.dataframe!)
+    # Информация о данных
     st.markdown("---")
     st.subheader("📋 Информация о данных")
     
@@ -90,11 +90,11 @@ if df is not None and len(df) > 0:
         })
     
     info_df = pd.DataFrame(info)
-    st.table(info_df)  # st.table() не использует Arrow!
+    st.table(info_df)
     
-    # Опционально: показать первые 10 строк как текст
-    with st.expander("🔍 Просмотр первых записей (текст)"):
-        st.write(df.head(10).to_markdown(index=False))
+    # Просмотр данных
+    with st.expander("🔍 Просмотр данных"):
+        st.dataframe(df.head(100), use_container_width=True)
 
 else:
-    st.warning("⚠️ Данные не загружены. Проверьте путь: `O:\\extracted\\mimovrste_sample.parquet`")
+    st.warning("⚠️ Данные не загружены")
