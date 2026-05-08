@@ -20,7 +20,7 @@ def load_data():
             if col in df.columns:
                 df[col] = pd.to_numeric(df[col], errors='coerce')
         
-        # Преобразуем brand_name (убираем NaN)
+        # Преобразуем brand_name (заполняем пустые значения)
         if 'brand_name' in df.columns:
             df['brand_name'] = df['brand_name'].fillna('Unknown')
         
@@ -48,10 +48,13 @@ if df is not None and len(df) > 0:
     else:
         col3.metric("💰 Средняя цена", "N/A")
     
+    # ИСПРАВЛЕНИЕ: правильно считаем бренды
     if 'brand_name' in df.columns:
+        # Считаем только непустые и не-'Unknown' значения
         brands = df['brand_name'].dropna()
         brands = brands[brands != 'Unknown']
-        col4.metric("🏷️ Брендов", f"{brands.nunique():,}" if len(brands) > 0 else "N/A")
+        brands_count = brands.nunique()
+        col4.metric("🏷️ Брендов", f"{brands_count:,}" if brands_count > 0 else "N/A")
     else:
         col4.metric("🏷️ Брендов", "N/A")
     
@@ -97,4 +100,4 @@ if df is not None and len(df) > 0:
         st.dataframe(df.head(100), use_container_width=True)
 
 else:
-    st.warning("⚠️ Данные не загружены")
+    st.warning("⚠️ Данные не загружены. Проверьте путь к файлу.")
