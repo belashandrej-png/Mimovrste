@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import plotly.express as px
 import streamlit as st
 import pandas as pd
 import duckdb
