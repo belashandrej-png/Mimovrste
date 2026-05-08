@@ -9,51 +9,50 @@ from plotly.subplots import make_subplots
 # === НАСТРОЙКИ СТРАНИЦЫ И ТЕМЫ ===
 st.set_page_config(page_title="Mimovrste PRO Analytics", layout="wide", page_icon="📊")
 
-# Кастомный CSS для красивого дизайна (Dark Purple Theme)
+# Кастомный CSS для красивого дизайна (ГОЛУБАЯ ТЕМА)
 st.markdown("""
 <style>
     /* Основной фон и шрифты */
     .stApp {
-        background-color: #0f0c29;
-        background-image: linear-gradient(315deg, #0f0c29 0%, #302b63 74%, #24243e 100%);
+        background: linear-gradient(135deg, #001f3f 0%, #0074D9 50%, #7FDBFF 100%);
         color: #ffffff;
     }
     
     /* Заголовки */
     h1, h2, h3 {
-        color: #e0d4fc !important;
+        color: #e0f7ff !important;
         text-shadow: 2px 2px 4px #000000;
         font-family: 'Segoe UI', sans-serif;
     }
     
     /* Боковая панель */
     .css-1d391kg, .css-1l02zno {
-        background-color: #1a1a2e !important;
+        background-color: #001f3f !important;
     }
     
     /* Стиль метрик */
     div[data-testid="stMetricValue"] {
         font-size: 2rem !important;
-        color: #00ff88 !important;
+        color: #7FDBFF !important;
     }
     div[data-testid="stMetricLabel"] {
-        color: #b3b3b3 !important;
+        color: #b3e0ff !important;
     }
 
     /* Карточки (имитация) */
     .metric-card {
-        background: rgba(255, 255, 255, 0.05);
+        background: rgba(0, 116, 217, 0.2);
         backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(127, 219, 255, 0.3);
         border-radius: 15px;
         padding: 20px;
         text-align: center;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        box-shadow: 0 4px 15px rgba(0, 116, 217, 0.5);
         transition: transform 0.3s;
     }
     .metric-card:hover {
         transform: scale(1.02);
-        border-color: #a855f7;
+        border-color: #7FDBFF;
     }
     
     /* Графики */
@@ -79,6 +78,13 @@ def load_data():
         for col in ['price', 'current_price', 'lowest_price', 'msrp_price']:
             if col in df.columns:
                 df[col] = pd.to_numeric(df[col], errors='coerce')
+        
+        # ИСПРАВЛЕНИЕ: Преобразуем review_stars к числовому типу
+        if 'review_stars' in df.columns:
+            df['review_stars'] = pd.to_numeric(df['review_stars'], errors='coerce')
+        
+        if 'review_count' in df.columns:
+            df['review_count'] = pd.to_numeric(df['review_count'], errors='coerce')
         
         return df
     except Exception as e:
@@ -131,11 +137,14 @@ if df is not None:
             st.metric(label="🏷️ Уникальных Брендов", value="N/A")
     
     with col3:
-        st.metric(label="💰 Средняя Цена", value=f"{df['price'].mean():.2f} €")
+        if 'price' in df.columns:
+            valid_prices = df['price'].dropna()
+            st.metric(label="💰 Средняя Цена", value=f"{valid_prices.mean():.2f} €" if len(valid_prices) > 0 else "N/A")
     
     with col4:
         if 'review_stars' in df.columns:
-            st.metric(label="⭐ Средний Рейтинг", value=f"{df['review_stars'].mean():.2f}/5")
+            valid_ratings = df['review_stars'].dropna()
+            st.metric(label="⭐ Средний Рейтинг", value=f"{valid_ratings.mean():.2f}/5" if len(valid_ratings) > 0 else "N/A")
         else:
             st.metric(label="⭐ Средний Рейтинг", value="N/A")
 
@@ -150,19 +159,21 @@ if df is not None:
             cat_counts = df['category_name'].value_counts().head(15).reset_index()
             cat_counts.columns = ['Категория', 'Количество']
             fig_tree = px.treemap(cat_counts, path=['Категория'], values='Количество',
-                                  color='Количество', color_continuous_scale='purp',
+                                  color='Количество', color_continuous_scale='Blues',
                                   title='Топ-15 категорий по объему')
             fig_tree.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
             st.plotly_chart(fig_tree, use_container_width=True)
 
     with col_b:
         st.subheader("💸 Распределение цен (Histogram)")
-        fig_hist = px.histogram(df, x='price', nbins=50, 
-                                color_discrete_sequence=['#a855f7'], # Фиолетовый цвет
-                                title='Частота встречаемости цен')
-        fig_hist.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-                               font_color="white")
-        st.plotly_chart(fig_hist, use_container_width=True)
+        if 'price' in df.columns:
+            df_clean = df[(df['price'] > 0) & (df['price'] < 500)]
+            fig_hist = px.histogram(df_clean, x='price', nbins=50, 
+                                    color_discrete_sequence=['#0074D9'], # Голубой цвет
+                                    title='Частота встречаемости цен')
+            fig_hist.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+                                   font_color="white")
+            st.plotly_chart(fig_hist, use_container_width=True)
 
     # === БЛОК 3: ДЕТАЛЬНАЯ АНАЛИТИКА (Много графиков) ===
     st.markdown("---")
@@ -176,7 +187,7 @@ if df is not None:
             brand_counts = df['brand_name'].value_counts().head(10).reset_index()
             brand_counts.columns = ['Бренд', 'Количество']
             fig_bar = px.bar(brand_counts, x='Количество', y='Бренд', orientation='h',
-                             color='Количество', color_continuous_scale='plasma',
+                             color='Количество', color_continuous_scale='Blues',
                              title='Лидеры рынка')
             fig_bar.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
                                   font_color="white")
@@ -184,13 +195,13 @@ if df is not None:
 
     with c2:
         st.subheader("📉 Разброс цен по Категориям (Box Plot)")
-        if 'category_name' in df.columns:
+        if 'category_name' in df.columns and 'price' in df.columns:
             # Берем топ-5 категорий для наглядности
             top_5_cats = df['category_name'].value_counts().head(5).index
             df_box = df[df['category_name'].isin(top_5_cats)]
             fig_box = px.box(df_box, x='category_name', y='price', color='category_name',
                              title='Медиана и выбросы цен',
-                             color_discrete_sequence=px.colors.sequential.Purples_r)
+                             color_discrete_sequence=px.colors.sequential.Blues)
             fig_box.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
                                   font_color="white")
             st.plotly_chart(fig_box, use_container_width=True)
@@ -200,7 +211,7 @@ if df is not None:
 
     with c3:
         st.subheader("💎 Цена vs Количество отзывов (Scatter)")
-        if 'review_count' in df.columns:
+        if 'review_count' in df.columns and 'price' in df.columns:
             df_scatter = df[(df['review_count'] < 100) & (df['price'] < 200)].dropna() # Фильтр выбросов
             fig_scatter = px.scatter(df_scatter, x='review_count', y='price',
                                      color='category_name' if 'category_name' in df_scatter.columns else None, 
@@ -218,7 +229,7 @@ if df is not None:
         if len(numeric_cols) > 1:
             corr = df[numeric_cols].corr()
             fig_heat = px.imshow(corr, text_auto='.2f', 
-                                 color_continuous_scale='Viridis', # Фиолетово-зеленая гамма
+                                 color_continuous_scale='Blues', # Голубая гамма
                                  title='Корреляция между числовыми параметрами')
             fig_heat.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
                                    font_color="white")
@@ -227,7 +238,12 @@ if df is not None:
     # === БЛОК 5: ТАБЛИЦА ДАННЫХ ===
     st.markdown("---")
     st.subheader("📋 Данные (Preview)")
-    st.dataframe(df.head(10), use_container_width=True, height=300)
+    
+    # Показываем колонки для выбора
+    available_cols = ['name', 'price', 'current_price', 'brand_name', 'category_name', 'review_stars', 'review_count']
+    display_cols = [col for col in available_cols if col in df.columns]
+    
+    st.dataframe(df[display_cols].head(100), use_container_width=True)
 
 else:
     st.warning("⚠️ Данные не загружены!")
